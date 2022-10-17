@@ -1,18 +1,22 @@
 import { Button, Text, TextInput} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import jwtDecode from "jwt-decode"
+import { data } from "../App";
+
 
 export default function Home() {
   const navigation = useNavigation();
   const [number,setNumber] = useState('')
   const [error,setError] = useState("")
   const [user,setUser] = useState("")
+  const {setUid,setTempToken} = useContext(data)
 
 
 useEffect(()=>{
-    if (user.user){
+    if (user){
+        setUid(user.uid)
         navigation.navigate("test")
     }
 },[user,setUser])
@@ -33,6 +37,7 @@ useEffect(()=>{
             if(data.error){
                 setError(data.error)
             } if(data.token){
+                setTempToken(data.token)
                 setUser(jwtDecode(data.token))
             }
             
@@ -44,6 +49,7 @@ useEffect(()=>{
   return (
     <SafeAreaView style = {{}}>
       <Text>Home page</Text>
+      
       {user && console.log(user)}
       <Button
         title="go to test"
@@ -57,8 +63,10 @@ useEffect(()=>{
         color:"white",
         borderWidth: 1,
         padding: 10,
+        flex:1,
         width:"30%",
-    backgroundColor:"blue"}}
+    backgroundColor:
+    "blue"}}
       />
 {error && <Text>{error}</Text>}
 <Button title="submit number" onPress={()=>handlesubmit()}></Button>
