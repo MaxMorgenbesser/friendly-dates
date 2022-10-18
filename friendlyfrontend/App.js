@@ -4,19 +4,22 @@ import LoginNav from './Navigation/LoginNav';
 import { createContext,useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
+import AppNav from './Navigation/AppNav';
 
 
 export const data = createContext()
 export default function App() {
   const [uid,setUid] = useState()
+  const [pin,setPin] = useState()
   const [tempToken,setTempToken] = useState()
 
   return (
-    <data.Provider value={{setUid,uid,setTempToken,tempToken}}>
+    
+    <data.Provider value={{setUid,uid,setTempToken,tempToken,pin, setPin}}>
   <NavigationContainer initialRouteName = "test">
   
  <LoginNav/>
-   
+ 
  </NavigationContainer>
  </data.Provider>
   );
