@@ -11,11 +11,12 @@ export const data = createContext()
 export default function App() {
   const [uid,setUid] = useState()
   const [pin,setPin] = useState()
+  const [user,setUser] = useState()
   const [tempToken,setTempToken] = useState()
 
   return (
     
-    <data.Provider value={{setUid,uid,setTempToken,tempToken,pin, setPin}}>
+    <data.Provider value={{setUid,uid,setTempToken,tempToken,pin, setPin, user,setUser}}>
   <NavigationContainer initialRouteName = "test">
   
  <LoginNav/>
