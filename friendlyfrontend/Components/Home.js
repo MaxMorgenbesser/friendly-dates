@@ -10,12 +10,14 @@ export default function Home() {
   const navigation = useNavigation();
   const [number, setNumber] = useState("");
   const [error, setError] = useState("");
-  const [user, setUser] = useState("");
-  const { setUid, setTempToken, tempToken } = useContext(data);
+  // const [user, setUser] = useState("");
+  const { setUid, setTempToken, tempToken , user, setUser } = useContext(data);
 
-  // useEffect(()=>{
-  //   AsyncStorage.clear()
-  // },[])
+  useEffect(()=>{
+   if (user){
+    navigation.navigate("pin")
+   }
+  },[user,setUser])
 
   const handlesubmit = async () => {
     fetch("https://friendlydatesbackend.web.app/users/verifynum", {
@@ -32,11 +34,9 @@ export default function Home() {
           setError(data.error);
         }
         if (data.token) {
-            await AsyncStorage.setItem(
-            "tempToken",
-             data.token 
-          );
-          navigation.navigate("pin");
+           setTempToken(data.token)
+          setUser(jwtDecode(data.token))
+         
         }
       })
       .catch((err) => console.log(err));
@@ -53,8 +53,8 @@ export default function Home() {
 
       {/* {user && console.log(user)} */}
       <Button
-        title="go to test"
-        onPress={() => navigation.navigate("test")}
+        title="go to Add user"
+        onPress={() => navigation.navigate("AddUser")}
       ></Button>
       <Button
         title="go to pin"
@@ -71,12 +71,12 @@ export default function Home() {
         keyboardType="numeric"
         style={{
           height: 40,
-          margin: 12,
-          color: "black",
+          color:"black",
+         fontWeight:"bold",
           borderWidth: 1,
           padding: 10,
-          flex: 1,
-          width: "30%",
+          margin:"8%",
+          width: "40%",
           backgroundColor: "white",
         }}
       />

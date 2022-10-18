@@ -2,11 +2,11 @@ import { Button, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useState, useContext } from "react";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { data } from "../App";
 
 export default function Test() {
-  const { uid,tempToken } = useContext(data);
+  const { user,setUser ,tempToken} = useContext(data);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -14,11 +14,11 @@ export default function Test() {
   const navigation = useNavigation();
 
   const handleuserinfo = () => {
-    if (!uid)  {
+    if (!user.uid)  {
       setError("missing user id");
       return;
     }
-    fetch(`https://friendlydatesbackend.web.app/users/adduserinfo/${uid}`, {
+    fetch(`https://friendlydatesbackend.web.app/users/adduserinfo/${user.uid}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -29,13 +29,26 @@ export default function Test() {
       }),
     })
     .then(res=>res.json())
-    .then(data=>console.log(data))
+    .then( async (data) =>
+      { 
+        console.log(data)
+        if (data.error){
+          setError(data.error)
+          return
+        }
+        else{
+         await AsyncStorage.setItem("@token", data.token)
+         navigation.navigate("App")
+        }
+      
+      })
   };
 
   return (
-    <SafeAreaView>
-        {uid && console.log(uid)}
-      {firstName && console.log(firstName)}
+    <SafeAreaView style={{display:"flex",
+    alignItems:"center", justifyContent:"center"}}>
+        {/* {uid && console.log(uid)} */}
+      {/* {firstName && console.log(firstName)} */}
       <Text>You will add user info here</Text>
       <Button
         title="go home"
@@ -48,15 +61,16 @@ export default function Test() {
         onChangeText={setFirstName}
         style={{
           height: 40,
-          margin: 12,
-          color: "white",
+          color:"black",
+         fontWeight:"bold",
           borderWidth: 1,
           padding: 10,
-          width: "80%",
-          backgroundColor: "blue",
+          margin:"8%",
+          width: "60%",
+          backgroundColor: "white",
         }}
       />
-      {tempToken && console.log(tempToken)}
+      {/* {tempToken && console.log(tempToken)} */}
       <TextInput
         placeholder="first name"
         keyboardType="default"
@@ -64,26 +78,29 @@ export default function Test() {
         onChangeText={setLastName}
         style={{
           height: 40,
-          margin: 12,
-          color: "white",
+          color:"black",
+         fontWeight:"bold",
           borderWidth: 1,
           padding: 10,
-          width: "80%",
-          backgroundColor: "blue",
+          margin:"8%",
+          width: "60%",
+          backgroundColor: "white",
         }}
       />
       <TextInput
+      placeholder="email"
         keyboardType="email"
         value={email}
         onChangeText={setEmail}
         style={{
           height: 40,
-          margin: 12,
-          color: "white",
+          color:"black",
+         fontWeight:"bold",
           borderWidth: 1,
           padding: 10,
-          width: "80%",
-          backgroundColor: "blue",
+          margin:"8%",
+          width: "60%",
+          backgroundColor: "white",
         }}
       />
       <Button title="submit user info" onPress={()=>handleuserinfo()}/>
