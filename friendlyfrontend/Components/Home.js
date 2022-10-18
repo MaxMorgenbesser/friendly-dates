@@ -11,18 +11,13 @@ export default function Home() {
   const [number, setNumber] = useState("");
   const [error, setError] = useState("");
   const [user, setUser] = useState("");
-  const { setUid, setTempToken } = useContext(data);
+  const { setUid, setTempToken, tempToken } = useContext(data);
 
-  useEffect(() => {
-    if (user) {
-  navigation.navigate("pin")
-    }
-  }, [user, setUser]);
+  // useEffect(()=>{
+  //   AsyncStorage.clear()
+  // },[])
 
-
-
-
-  const handlesubmit = () => {
+  const handlesubmit = async () => {
     fetch("https://friendlydatesbackend.web.app/users/verifynum", {
       method: "POST",
       headers: {
@@ -31,19 +26,20 @@ export default function Home() {
       body: JSON.stringify({ number: Number(number) }),
     })
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         console.log(data);
         if (data.error) {
           setError(data.error);
         }
         if (data.token) {
-          setTempToken(data.token);
-          
-          setUser(jwtDecode(data.token));
-          
+            await AsyncStorage.setItem(
+            "tempToken",
+             data.token 
+          );
+          navigation.navigate("pin");
         }
-      }).catch(err=> console.log(err));
-     
+      })
+      .catch((err) => console.log(err));
   };
   return (
     <SafeAreaView
@@ -61,6 +57,10 @@ export default function Home() {
         onPress={() => navigation.navigate("test")}
       ></Button>
       <Button
+        title="go to pin"
+        onPress={() => navigation.navigate("pin")}
+      ></Button>
+      <Button
         title="go to App"
         onPress={() => navigation.navigate("App")}
       ></Button>
@@ -68,7 +68,7 @@ export default function Home() {
       <TextInput
         value={number}
         onChangeText={setNumber}
-        keyboardType="default"
+        keyboardType="numeric"
         style={{
           height: 40,
           margin: 12,

@@ -5,7 +5,7 @@ import Test from "../Components/Test";
 import Home from "../Components/Home";
 import AppNav from "./AppNav";
 // import { NavigationContainer } from "@react-navigation/native";
-import pin from "../Components/Pin";
+import Pin from "../Components/Pin";
 const Stack = createNativeStackNavigator();
 
 export default function LoginNav() {
@@ -14,7 +14,7 @@ export default function LoginNav() {
     <Stack.Navigator initialRouteName="home"  options={{ headerShown: false }}>
       <Stack.Screen name="test" component={Test} />
       <Stack.Screen name="home" component={Home} />
-      <Stack.Screen name="pin" component={pin} />
+      <Stack.Screen name="pin" component={Pin} />
       <Stack.Screen name="App" component={AppNav} />
     </Stack.Navigator>
   
