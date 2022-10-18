@@ -2,6 +2,44 @@ import { accountSID, authToken, secretKey, twilionumber } from "../credentials.j
 import { DbConnect } from "../dbconnect.js";
 import twilio from "twilio"
 import jwt from 'jsonwebtoken'
+import e from "express";
+
+export async function verifyPin (req,res){
+const pin = req.body.pin
+const uid = req.params.uid
+if (!uid || !pin){
+    res.status(400).send({"error":"missing fields"})
+    return
+}
+const collection = DbConnect()
+const user = await collection.findOne({uid:uid})
+// console.log(user)
+if (!user){
+    res.status(400).send({"error":"This user has not been created yet"})
+    return
+}
+if (pin != user.pin){
+    res.status(400).send({"error":"incorrect pin"})
+    return
+} else if (pin == user.pin){
+if (user.user){
+    res.status(200).send({"success":true, "token": jwt.sign(user,secretKey)})
+    return
+}else{
+res.status(200).send({"success":true, "newUser":true})
+
+}
+
+
+}
+
+}
+
+
+
+
+
+
 
 export async function verifynum (req,res){
     const number = req.body.number
@@ -78,6 +116,9 @@ if (!finduser || !finduser.uid == uid){
 }
 const senduser = await collection.findOneAndUpdate({uid:uid}, 
     {$set:{user:user}})
+if (!senduser){
+    res.send({"error":"user not found"})
+}
 const val = senduser.value
 val.user = user
 const token = jwt.sign(val,secretKey)

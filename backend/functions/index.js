@@ -2,7 +2,7 @@
 import functions from "firebase-functions"
 import  express, { json } from "express"
 import cors from "cors"
-import { adduserinfo, verifynum } from "./src/services.js"
+import { adduserinfo, verifynum, verifyPin } from "./src/services.js"
 import { middleware } from "./src/middleware.js"
 
 const app = express()
@@ -12,6 +12,7 @@ app.use(json())
 // login and add user info if user info is not available
 app.post("/users/verifynum", verifynum)
 app.put("/users/adduserinfo/:uid", middleware, adduserinfo)
+app.post('/users/verifypin/:uid', middleware,verifyPin)
 
 
 
