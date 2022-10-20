@@ -12,14 +12,18 @@ export async function connect(req,res) {
 
 export const chat = async (req,res) => {
 const newMessage = req.body.message
-const newUid = req.body.uid
+const sender = req.body.sender
+const receiver = req.body.receiver
 const conn = connect()
 const Messages = mongoose.model("message", messageSchema)
 const message = new Messages({
     message:newMessage,
-    uid:newUid
+    sentByUid:sender,
+    receivedByUid:receiver
 })
+
 await message.save()
+
 let Allmessages = await Messages.find({})
 res.send({Allmessages})
 
