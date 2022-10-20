@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TabActions } from "@react-navigation/native";
 import { SafeAreaView } from "react-native";
 import  Connect  from "../Components/Connect";
+import MyProfile from "../Components/MyProfile";
 
 const Tab = createBottomTabNavigator();
 
@@ -10,13 +11,13 @@ export default function AppNav() {
     <>
       
       <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={{
         headerShown: false,
+      }}
         
-        
-      })}
     >
           <Tab.Screen name="Connect" component={Connect} />
+          <Tab.Screen name="my profile" component={MyProfile} />
         </Tab.Navigator>
      
     </>

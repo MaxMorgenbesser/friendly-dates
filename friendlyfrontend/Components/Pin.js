@@ -1,17 +1,23 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
-import { useState, useContext } from "react";
+// import jwtDecode from "jwt-decode";
+import { useState, useContext, useEffect } from "react";
 import { data } from "../App";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Pin() {
   const [checkPin, setCheckPin] = useState("");
+  
   const [error, setError] = useState("");
-  const { user, setUser, tempToken } = useContext(data);
+  const { user, setUser, tempToken,token,SetToken } = useContext(data);
   const navigation = useNavigation();
-
+  useEffect(()=>{
+    if (token){
+     
+      AsyncStorage.setItem("@token" , JSON.stringify(token))
+    }
+  },[token,SetToken])
   const verifypin = () => {
     // console.log(tempToken,user.uid, checkPin)
     fetch(`https://friendlydatesbackend.web.app/users/verifypin/${user.uid}`, {
@@ -23,19 +29,25 @@ export default function Pin() {
       body: JSON.stringify({ pin: checkPin }),
     })
       .then((res) => res.json())
-      .then(async (data) => {
-        console.log(data);
-        if (data.error) {
-          setError(data.error);
+      .then(async (thisdata) => {
+          // await AsyncStorage.clear()
+         console.log(thisdata.token);
+        if (thisdata.error) {
+          setError(thisdata.error);
           return;
         }
-        if (data.newUser) {
+        if (thisdata.newUser) {
           navigation.navigate("AddUser");
           return;
         }
-
-        await AsyncStorage.setItem("@token", data.token);
-        navigation.navigate("App");
+if  (thisdata.token) {
+        SetToken(thisdata.token)
+        navigation.navigate("App")
+        return
+}
+else{
+  setError("unknown error")
+}
       })
       .catch((err) => console.log(err));
   };

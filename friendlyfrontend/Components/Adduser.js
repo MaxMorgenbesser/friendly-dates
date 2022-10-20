@@ -50,6 +50,7 @@ export default function Test() {
         {/* {uid && console.log(uid)} */}
       {/* {firstName && console.log(firstName)} */}
       <Text>You will add user info here</Text>
+      <Button onPress={()=> AsyncStorage.clear()} title = "clear AsyncStorage"></Button>
       <Button
         title="go home"
         onPress={() => navigation.navigate("home")}

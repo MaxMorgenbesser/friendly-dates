@@ -10,11 +10,11 @@ const Stack = createNativeStackNavigator();
 
 export default function LoginNav() {
   return (
-    <Stack.Navigator initialRouteName="home"  options={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="home" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="AddUser" component={AddUser} />
       <Stack.Screen name="home" component={Home} />
       <Stack.Screen name="pin" component={Pin} />
-      <Stack.Screen name="App" component={AppNav} />
+      <Stack.Screen name="App" component={AppNav}  />
     </Stack.Navigator>
   
   );
