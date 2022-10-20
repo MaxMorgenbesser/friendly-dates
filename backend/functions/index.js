@@ -4,6 +4,7 @@ import  express, { json } from "express"
 import cors from "cors"
 import { adduserinfo, verifynum, verifyPin } from "./src/services.js"
 import { middleware } from "./src/middleware.js"
+import {chat} from './src/connection.js'
 
 const app = express()
 app.use(cors())
@@ -13,7 +14,7 @@ app.use(json())
 app.post("/users/verifynum", verifynum)
 app.put("/users/adduserinfo/:uid", middleware, adduserinfo)
 app.post('/users/verifypin/:uid', middleware,verifyPin)
-
+app.post('/messages', chat)
 
 
 
