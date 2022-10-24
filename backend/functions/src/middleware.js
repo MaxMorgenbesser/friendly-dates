@@ -17,7 +17,7 @@ export const middleware = async (req, res, next) => {
   if (user.uid) {
     const collection = DbConnect();
     const thisuser = await collection.findOne({uid:user.uid})
-    console.log(thisuser);
+    // console.log(thisuser);
     if (thisuser) next();
     else res.send({"error":"user not found"})
 
