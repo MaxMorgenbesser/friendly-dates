@@ -37,7 +37,7 @@ export default function Test() {
           return
         }
         else{
-         await AsyncStorage.setItem("@token", data.token)
+         await AsyncStorage.setItem("@token", JSON.stringify(data.token))
          navigation.navigate("App")
         }
       
