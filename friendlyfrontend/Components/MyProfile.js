@@ -1,14 +1,16 @@
-import { View, Text, SafeAreaView ,Button } from "react-native";
+import { View, Text, SafeAreaView ,Button,TouchableOpacity, Dimensions } from "react-native";
 import { data } from "../App";
 import { useContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import * as ImagePicker from 'expo-image-picker';
-import {Camera} from 'expo-camera'
-
+import {Camera, CameraType} from 'expo-camera'
+// let camera: Camera
 
 export default function MyProfile() {
+  const [camera, setCamera] = useState(null);
   const { token } = useContext(data);
   const [user, setUser] = useState();
+  const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState();
   const [showCamera, SetShowCamera] = useState(false);
 
@@ -16,9 +18,25 @@ export default function MyProfile() {
     const {status} = await Camera.requestCameraPermissionsAsync()
  if(status === 'granted'){
     SetShowCamera(!showCamera)
+ 
  }else{``
    Alert.alert("Access denied")
  }
+}
+
+
+const takePicture = async () => {
+  if (camera) {
+    const data = await camera.takePictureAsync();
+    console.log(data.uri);
+    setPhoto(data.uri);
+    SetShowCamera(false)
+  }
+};
+
+
+function toggleCameraType() {
+  setType((current) => (current === CameraType.back ? CameraType.front : CameraType.back));
 }
 
   const pickImage = async () => {
@@ -76,8 +94,33 @@ export default function MyProfile() {
         </View>
       )}
         <Button title = "submit photo" onPress={()=>(startCamera())}></Button>
-      {showCamera && <Camera m style={{flex: 1,width:"100%"}}
-      ></Camera>}
+      {showCamera && <Camera type={type} 
+      ref={(ref) => setCamera(ref)}
+      style={{flex: 1,width:"100%"}}
+      ><View>
+        
+        <TouchableOpacity style={{
+        backgroundColor: "white",
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+      }}
+      onPress={takePicture}/>
+        <TouchableOpacity
+        onPress={toggleCameraType}
+        style={
+         {
+          backgroundColor: "white",
+          width: 50,
+          height: 50,
+          borderRadius: 50,
+        }
+        
+      }/>
+      
+      
+      </View>
+        </Camera>}
     </SafeAreaView>
   );
 }
