@@ -19,7 +19,7 @@ export default function MyProfile() {
  if(status === 'granted'){
     SetShowCamera(!showCamera)
  
- }else{``
+ }else{
    Alert.alert("Access denied")
  }
 }
@@ -61,9 +61,11 @@ function toggleCameraType() {
 
   useEffect(() => {
     if (token) {
-      setUser(jwtDecode(token));
+      console.log(token);
     }
   }, [token]);
+
+
   return (
     <SafeAreaView
       style={{
@@ -84,20 +86,18 @@ function toggleCameraType() {
       {user && (
         <View>
           <Text>welcome {user.user.firstName}</Text>
-          <Button title="Choose Photo" onPress={pickImage} />
+         
           
 
           
-          {/* {startCamera && (
-        <Camera
-          style={{flex: 1,width:"100%"}}
-          ref={(r) => {
-            camera = r
-          )}} ></Camera> */}
+        
         </View>
       )}
+       <Button title="Choose Photo" onPress={pickImage} />
       {photo && <Image source = {{uri:photo}} style={{ height: 200, margin: 10, width: 200}} resizeMode="contain"/>}
-        <Button title = "submit photo" onPress={()=>(startCamera())}></Button>
+        <Button title = "Take photo instead" onPress={()=>{
+          setPhoto(null)
+          startCamera()}}></Button>
       {showCamera && <Camera type={type} 
       ref={(ref) => setCamera(ref)}
       style={{flex: 1,width:"100%"}}
