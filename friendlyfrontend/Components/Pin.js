@@ -15,7 +15,7 @@ export default function Pin() {
   useEffect(()=>{
     if (token){
      
-      AsyncStorage.setItem("@token" , JSON.stringify(token))
+      AsyncStorage.setItem("token" , (token))
     }
   },[token,SetToken])
   const verifypin = () => {

@@ -36,7 +36,6 @@ export default function Home() {
         if (data.token) {
            setTempToken(data.token)
           setUser(jwtDecode(data.token))
-         
         }
       })
       .catch((err) => console.log(err));
