@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView ,Button,TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, SafeAreaView ,Button,TouchableOpacity, Dimensions, Image } from "react-native";
 import { data } from "../App";
 import { useContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
@@ -85,6 +85,9 @@ function toggleCameraType() {
         <View>
           <Text>welcome {user.user.firstName}</Text>
           <Button title="Choose Photo" onPress={pickImage} />
+          
+
+          
           {/* {startCamera && (
         <Camera
           style={{flex: 1,width:"100%"}}
@@ -93,6 +96,7 @@ function toggleCameraType() {
           )}} ></Camera> */}
         </View>
       )}
+      {photo && <Image source = {{uri:photo}} style={{ height: 200, margin: 10, width: 200}} resizeMode="contain"/>}
         <Button title = "submit photo" onPress={()=>(startCamera())}></Button>
       {showCamera && <Camera type={type} 
       ref={(ref) => setCamera(ref)}
