@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import LoginNav from './Navigation/LoginNav';
-import { createContext,useState } from 'react';
+import { createContext,useState, useEffect} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNav from './Navigation/AppNav';
@@ -14,7 +14,17 @@ export default function App() {
   const [pin,setPin] = useState()
   const [user,setUser] = useState()
   const [tempToken,setTempToken] = useState()
-  const [token, SetToken ] = useState(AsyncStorage.getItem("@token"))
+  const [token, SetToken ] = useState()
+
+useEffect(()=>{
+  getToken()
+},[])
+
+async function getToken (){
+  SetToken( await AsyncStorage.getItem("token"))
+  console.log(token)
+}
+
   return (
     <data.Provider value={{setUid,uid,setTempToken,tempToken,pin, setPin, user,setUser, token,SetToken}}>
   <NavigationContainer initialRouteName = "test">

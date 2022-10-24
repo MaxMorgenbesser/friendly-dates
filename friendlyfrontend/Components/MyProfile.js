@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import * as ImagePicker from 'expo-image-picker';
 import {Camera, CameraType} from 'expo-camera'
-// let camera: Camera
+
 
 export default function MyProfile() {
   const [camera, setCamera] = useState(null);
@@ -15,10 +15,9 @@ export default function MyProfile() {
   const [showCamera, SetShowCamera] = useState(false);
 
   const startCamera = async () => {
-    const {status} = await Camera.requestCameraPermissionsAsync()
+  const {status} = await Camera.requestCameraPermissionsAsync()
  if(status === 'granted'){
     SetShowCamera(!showCamera)
- 
  }else{
    Alert.alert("Access denied")
  }
@@ -62,6 +61,7 @@ function toggleCameraType() {
   useEffect(() => {
     if (token) {
       console.log(token);
+      setUser(jwtDecode(token))
     }
   }, [token]);
 
@@ -93,11 +93,17 @@ function toggleCameraType() {
         
         </View>
       )}
-       <Button title="Choose Photo" onPress={pickImage} />
-      {photo && <Image source = {{uri:photo}} style={{ height: 200, margin: 10, width: 200}} resizeMode="contain"/>}
-        <Button title = "Take photo instead" onPress={()=>{
+     { !photo && !showCamera && <Button title="Choose Photo" onPress={pickImage} />}
+      {photo && <><Image source = {{uri:photo}} style={{ height: 200, margin: 10, width: 200}} resizeMode="contain"/>
+      <Button title="use a different photo" onPress={()=> setPhoto(null)} ></Button>
+      <Button title="Submit Photo"  ></Button>
+      </>}
+
+    
+      {!photo && !showCamera &&  <Button title = "Take photo instead" onPress={()=>{
           setPhoto(null)
           startCamera()}}></Button>
+      }
       {showCamera && <Camera type={type} 
       ref={(ref) => setCamera(ref)}
       style={{flex: 1,width:"100%"}}
@@ -122,7 +128,7 @@ function toggleCameraType() {
         
       }/>
       
-      
+      <Button title = "cancel" onPress={()=>SetShowCamera(false)}></Button>
       </View>
         </Camera>}
     </SafeAreaView>
