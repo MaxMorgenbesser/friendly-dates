@@ -4,10 +4,11 @@ import {
   secretKey,
   twilionumber,
 } from "../credentials.js";
-import { DbConnect } from "../dbconnect.js";
+import { DbConnect, storageConnect } from "../dbconnect.js";
 import twilio from "twilio";
 import jwt from "jsonwebtoken";
 import e from "express";
+import { getStorage } from "firebase/storage";
 
 export async function verifyPin(req, res) {
   const pin = req.body.pin;
@@ -124,7 +125,7 @@ export const adduserinfo = async (req, res) => {
   res.status(200).send({ token: token });
 };
 
-export const updatePhotos = async (req, res) => {
+export const userProfile = async (req, res) => {
   const uid = req.params.uid;
   const photo = req.body.photo;
   const bio = req.body.bio;
@@ -145,6 +146,12 @@ export const updatePhotos = async (req, res) => {
   if (!user) {
     res.status(400).send({ error: "invalid user" });
     return;
+  }
+
+  if (photo){
+    console.log("there is a photo")
+    storageConnect()
+    
   }
 
   if (photo && !bio) {
@@ -170,3 +177,17 @@ export const updatePhotos = async (req, res) => {
   res.send({ "bio and photo updated": true });
   return;
 };
+ 
+
+// export const updatePhotos = async (req,res)=>{
+// const uid = req.params.uid
+// console.log(uid)
+// if (!uid){
+//   res.status(400).send({"error":"user not found"})
+//   return
+// }
+
+// const storage = storageConnect()
+// console.log(storage)
+// res.send({"sucess":true})
+// }
