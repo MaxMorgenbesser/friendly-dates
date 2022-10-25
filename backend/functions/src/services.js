@@ -4,10 +4,13 @@ import {
   secretKey,
   twilionumber,
 } from "../credentials.js";
+import fs from "fs";
+import path from "path";
+// import resume from '.MaxMorgenbesser_Resume_2022.jpg' assert {type:"jpg"}
 import { DbConnect, storageConnect } from "../dbconnect.js";
 import twilio from "twilio";
 import jwt from "jsonwebtoken";
-import e from "express";
+// import e from "express";
 import { getStorage } from "firebase/storage";
 
 export async function verifyPin(req, res) {
@@ -135,7 +138,7 @@ export const userProfile = async (req, res) => {
     return;
   }
 
-  if (!bio && !photo){
+  if (!bio && !photo) {
     res.status(400).send({ error: "fields are required" });
     return;
   }
@@ -148,14 +151,25 @@ export const userProfile = async (req, res) => {
     return;
   }
 
-  if (photo){
-    console.log("there is a photo")
-    storageConnect()
-    
+  if (photo) {
+    // console.log("there is a photo");
+    const gc = await storageConnect();
+    const friendlydatesbucket = gc.bucket("friendlydates");
+    const uploadedfile = await friendlydatesbucket.upload(photo)
+    .catch(err=>console.log(err))
+    ;
+    console.log(uploadedfile);
+    //  (friendlydatesbucket.getFiles(file => console.log(file)))
+    const [files] = await friendlydatesbucket.getFiles();
+    console.log("Files:");
+    files.forEach((file) => {
+      console.log(file.metadata);
+    });
+    // .catch(err => console.log(err))
   }
 
   if (photo && !bio) {
-    collection.findOneAndUpdate(
+   await collection.findOneAndUpdate(
       { uid: uid },
       { $push: { "user.photos": photo } }
     );
@@ -164,20 +178,19 @@ export const userProfile = async (req, res) => {
   }
 
   if (bio && !photo) {
-    collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+   await collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
     res.status(200).send({ bio: true });
     return;
   }
 
-  collection.findOneAndUpdate(
+  await collection.findOneAndUpdate(
     { uid: uid },
     { $push: { "user.photos": photo } }
   );
-  collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+   await collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
   res.send({ "bio and photo updated": true });
   return;
 };
- 
 
 // export const updatePhotos = async (req,res)=>{
 // const uid = req.params.uid

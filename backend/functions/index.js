@@ -14,7 +14,7 @@ app.use(json())
 app.post("/users/verifynum", verifynum)
 app.put("/users/adduserinfo/:uid", middleware, adduserinfo)
 // app.put("/users/updateuser/bio/:uid", middleware, updateBios)
-app.put("/users/updateuser/:uid", middleware, userProfile)
+app.put("/users/updateuser/:uid", userProfile)
 app.post('/users/verifypin/:uid', middleware,verifyPin)
 app.post('/messages/add',  middleware,addMessage)
 
