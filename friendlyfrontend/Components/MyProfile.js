@@ -25,16 +25,16 @@ export default function MyProfile() {
   const [user, setUser] = useState();
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState();
-  const [blob, setBlob] = useState();
+  // const [blob, setBlob] = useState();
   const [showCamera, SetShowCamera] = useState(false);
 
-  useEffect(() => {
-    if (photo) {
-      // console.log(photo)
-      setBlob(getBlob(photo));
-      //  console.log(getBlob(photo));
-    }
-  }, [photo, setPhoto]);
+  // useEffect(() => {
+  //   if (photo) {
+  //     // console.log(photo)
+  //     setBlob(getBlob(photo));
+  //     //  console.log(getBlob(photo));
+  //   }
+  // }, [photo, setPhoto]);
 
   const getBlob = async (fileUri) => {
     // console.log(fileUri);
@@ -44,17 +44,19 @@ export default function MyProfile() {
       [{ resize: { width: 400 } }], // resize to width of 300 and preserve aspect ratio
       { compress: 0.6, format: "jpeg" }
     );
-    console.log(resizedPhoto);
+    // console.log(resizedPhoto);
     const resp = await fetch(resizedPhoto.uri);
+    console.log(resp)
     const blob = await resp.blob()
     return blob;
   };
 
 
   const submitPhoto = async () => {
-// const gc = await storageConnect()
-     setBlob( await getBlob(photo))
-
+// const gc = wait storageConnect()
+     const blob = await getBlob(photo)
+      console.log(blob)
+      
 
     fetch(`https://friendlydatesbackend.web.app/users/updateuser/${user.uid}`, {
       method: "PUT",
@@ -62,12 +64,12 @@ export default function MyProfile() {
         Authorization: token,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ photo: blob}), 
+      body: JSON.stringify({ "photo": blob}), 
     })
       .then((res) => res.json())
       .then((data) => {
         setPhoto(null);
-        setBlob(null);
+        // setBlob(null);
         console.log(data);
       })
       .catch((err) => console.log(err));
@@ -130,8 +132,8 @@ export default function MyProfile() {
         flexDirection: "column",
       }}
     >
-      {photo && console.log(photo)}
-      {blob && console.log(blob)}
+      {/* {photo && console.log(photo)} */}
+      {/* {blob && console.log(blob)} */}
       <View>
         <Text>My profile is going here</Text>
       </View>

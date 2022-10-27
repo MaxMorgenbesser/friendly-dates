@@ -153,12 +153,20 @@ export const userProfile = async (req, res) => {
 
   if (photo) {
     // console.log("there is a photo");
+    console.log(photo)
     const gc = await storageConnect();
     const friendlydatesbucket = gc.bucket("friendlydates");
-    const uploadedfile = await friendlydatesbucket.upload(photo)
-    .catch(err=>console.log(err))
-    ;
-    console.log(uploadedfile);
+    const upload = friendlydatesbucket.file(photo);
+    const uploadstream = upload
+    .createWriteStream();
+    uploadstream.on("finish", () => {
+      console.log("file uploaded");
+    });
+    uploadstream
+      .end()
+      // .catch((err) => console.log(err));
+
+    // console.log(uploadedfile);
     //  (friendlydatesbucket.getFiles(file => console.log(file)))
     const [files] = await friendlydatesbucket.getFiles();
     console.log("Files:");
@@ -169,7 +177,7 @@ export const userProfile = async (req, res) => {
   }
 
   if (photo && !bio) {
-   await collection.findOneAndUpdate(
+    await collection.findOneAndUpdate(
       { uid: uid },
       { $push: { "user.photos": photo } }
     );
@@ -178,7 +186,10 @@ export const userProfile = async (req, res) => {
   }
 
   if (bio && !photo) {
-   await collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+    await collection.findOneAndUpdate(
+      { uid: uid },
+      { $set: { "user.bio": bio } }
+    );
     res.status(200).send({ bio: true });
     return;
   }
@@ -187,7 +198,10 @@ export const userProfile = async (req, res) => {
     { uid: uid },
     { $push: { "user.photos": photo } }
   );
-   await collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+  await collection.findOneAndUpdate(
+    { uid: uid },
+    { $set: { "user.bio": bio } }
+  );
   res.send({ "bio and photo updated": true });
   return;
 };
