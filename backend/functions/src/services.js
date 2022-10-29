@@ -7,7 +7,115 @@ import {
 import { DbConnect } from "../dbconnect.js";
 import twilio from "twilio";
 import jwt from "jsonwebtoken";
-import e from "express";
+// import e from "express";
+
+export async function getmatches(req, res) {
+  let matcharr = [];
+  const uid = req.params.uid;
+  if (!uid) {
+    res.status(400).send({ error: "user not found" });
+    return;
+  }
+
+  const collection = DbConnect();
+  const user = await collection.findOne({ uid: uid });
+  // console.log(user)
+  if (!user) {
+    res.status(400).send({ error: "user not found" });
+    return;
+  }
+
+  const allusers = await collection.find().toArray();
+  // console.log(allusers)
+  // console.log(user);
+  if (user.user && user.user.likesme && user.user.Ilike) {
+    console.log(user.user.likesme)
+    console.log(user.user.Ilike)
+    allusers.map((oneuser) => {
+      if (oneuser.user && oneuser.user.Ilike) {
+        console.log(oneuser.user.Ilike);
+        if (
+          oneuser.user.Ilike.includes(uid) &&
+          user.user.Ilike.includes(oneuser.uid)
+        ) {
+          matcharr.push(oneuser);
+        }
+      }
+
+      // console.log(true)
+
+      //  && user.user?.Ilike?.includes(oneuser.uid)
+    });
+    res.status(200).send({ "matches found": matcharr });
+    return;
+  }
+  res.status(200).send({ "matches found": false });
+}
+
+export async function likeOrDislike(req, res) {
+  let uid = req.params.uid;
+  const status = req.body.status;
+  console.log(status);
+  // console.log(uid);
+  if (!uid) {
+    res.status(400).send({ error: "sender not found" });
+    return;
+  }
+
+  if (!status || status != "like" && status !="dislike" ) {
+    res.status(400).send({ error: "status is incorrect" });
+    return;
+  }
+
+  const collection = DbConnect();
+  const sender = await collection.findOne({ uid: uid });
+  console.log(sender);
+  if (!sender) {
+    res.status(400).send({ error: "sender not found" });
+    return;
+  }
+
+  let receiversUID = req.body.uid;
+
+  const receiver = await collection.findOne({ uid: receiversUID });
+
+  if (!receiver) {
+    res.send(res.status(400).send({ error: "receiver not found" }));
+  }
+  if (status == "like") {
+    const updatedSender = await collection.findOneAndUpdate(
+      { uid: uid },
+      {
+        $push: { "user.Ilike": receiversUID },
+      }
+    );
+    const updatedReceiver = await collection.findOneAndUpdate(
+      { uid: receiversUID },
+      { $push: { "user.likesme": uid } }
+    );
+
+    res.status(200).send({ "user liked": true });
+    return;
+  }
+
+ if (status == "dislike") {
+    await collection.findOneAndUpdate(
+      { uid: uid },
+      {
+        $push: { "user.Idislike": receiversUID },
+      }
+    );
+    await collection.findOneAndUpdate(
+      { uid: receiversUID },
+      { $push: { "user.dislikeslikesme": uid } }
+    );
+    res.status(200).send({ "user disliked": true });
+    return;
+  }
+
+  res.status(400).send({ error: "invalid status" });
+  return;
+}
 
 export async function verifyPin(req, res) {
   const pin = req.body.pin;
@@ -124,7 +232,7 @@ export const adduserinfo = async (req, res) => {
   res.status(200).send({ token: token });
 };
 
-export const updatePhotos = async (req, res) => {
+export const userProfile = async (req, res) => {
   const uid = req.params.uid;
   const photo = req.body.photo;
   const bio = req.body.bio;
@@ -134,7 +242,7 @@ export const updatePhotos = async (req, res) => {
     return;
   }
 
-  if (!bio && !photo){
+  if (!bio && !photo) {
     res.status(400).send({ error: "fields are required" });
     return;
   }
@@ -147,8 +255,33 @@ export const updatePhotos = async (req, res) => {
     return;
   }
 
+  if (photo) {
+    // console.log("there is a photo");
+    console.log(photo)
+    const gc = await storageConnect();
+    const friendlydatesbucket = gc.bucket("friendlydates");
+    const upload = friendlydatesbucket.file(photo);
+    const uploadstream = upload
+    .createWriteStream();
+    uploadstream.on("finish", () => {
+      console.log("file uploaded");
+    });
+    uploadstream
+      .end()
+      // .catch((err) => console.log(err));
+
+    // console.log(uploadedfile);
+    //  (friendlydatesbucket.getFiles(file => console.log(file)))
+    const [files] = await friendlydatesbucket.getFiles();
+    console.log("Files:");
+    files.forEach((file) => {
+      console.log(file.metadata);
+    });
+    // .catch(err => console.log(err))
+  }
+
   if (photo && !bio) {
-    collection.findOneAndUpdate(
+    await collection.findOneAndUpdate(
       { uid: uid },
       { $push: { "user.photos": photo } }
     );
@@ -157,16 +290,22 @@ export const updatePhotos = async (req, res) => {
   }
 
   if (bio && !photo) {
-    collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+    await collection.findOneAndUpdate(
+      { uid: uid },
+      { $set: { "user.bio": bio } }
+    );
     res.status(200).send({ bio: true });
     return;
   }
 
-  collection.findOneAndUpdate(
+  await collection.findOneAndUpdate(
     { uid: uid },
     { $push: { "user.photos": photo } }
   );
-  collection.findOneAndUpdate({ uid: uid }, { $set: { "user.bio": bio } });
+  await collection.findOneAndUpdate(
+    { uid: uid },
+    { $set: { "user.bio": bio } }
+  );
   res.send({ "bio and photo updated": true });
   return;
 };
