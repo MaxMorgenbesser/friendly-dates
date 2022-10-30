@@ -11,13 +11,38 @@ export default function Connect() {
   const [pms, setPms] = useState();
   const [user, setUser] = useState(jwtDecode(token));
 
+  useEffect(() => {
+    if (status && uid) {
+      sendstatus();
+      console.log("wodubc");
+    }
+  }, [status, setStatus]);
 
-  
-  
-  
-  
-  
-  
+  const [status, setStatus] = useState(null);
+  const [uid, setUID] = useState(null);
+
+  const sendstatus = () => {
+    if (status && uid) {
+      fetch(
+        `https://friendlydatesbackend.web.app/connect/likeordislike/${user.uid}`,
+        {
+          method: "PUT",
+          headers: { Authorization: token, "Content-Type": "application/json" },
+          body: JSON.stringify({ status: status, uid: uid }),
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setStatus(null);
+          setUID(null);
+        })
+        .catch((err) => console.log(err));
+    } else {
+      console.log("need uid or status");
+    }
+  };
+
   useEffect(() => {
     fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
       headers: { Authorization: token },
@@ -29,6 +54,7 @@ export default function Connect() {
       })
       .catch((err) => console.log(err));
   }, []);
+
   return (
     <SafeAreaView
       style={{
@@ -56,12 +82,24 @@ export default function Connect() {
                 flexDirection: "row",
                 height: "85%",
                 width: "80%",
-                overflow:"scroll"
+                overflow: "scroll",
               }}
             >
-              <Button title="like"></Button>
-              <Text>{pm.user.firstName}</Text>
-              <Button title="dislike"></Button>
+              <Button
+                title="like"
+                onPress={() => {
+                  setStatus("like");
+                  setUID(pm.uid);
+                }}
+              ></Button>
+              <Text key={pm.uid}>{pm.user.firstName}</Text>
+              <Button
+                title="dislike"
+                onPress={() => {
+                  setStatus("dislike");
+                  setUID(pm.uid);
+                }}
+              ></Button>
             </View>
           );
         })}

@@ -10,10 +10,11 @@ export default function Matches() {
   // const [user,setUser] = useState(jwtDecode(token))
   const [matches, setMatches] = useState();
   const [loading, setLoading] = useState(null);
-
+  
   useEffect(() => {
-    fetch(`https://friendlydatesbackend.web.app/connect/matches/${user.uid}`,{
-        headers: {"Authorization": token}
+    fetch(`https://friendlydatesbackend.web.app/connect/matches/${user.uid}`, {
+      method:"PUT",
+      headers: { Authorization: token },
     })
       .then((res) => res.json())
       .then((data) => setMatches(data))
@@ -23,10 +24,11 @@ export default function Matches() {
     <SafeAreaView>
       {matches && console.log(matches)}
       <Text>My matches will appear here</Text>
-      {matches && matches["matches found"] &&
+      {matches &&
+        matches["matches found"] &&
         matches["matches found"].map((match) => {
           return (
-            <View >
+            <View>
               <Text key={match.uid}>{match.user.firstName}</Text>
             </View>
           );
