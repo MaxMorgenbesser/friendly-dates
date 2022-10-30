@@ -36,6 +36,16 @@ export default function Connect() {
           console.log(data);
           setStatus(null);
           setUID(null);
+
+          fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
+            headers: { Authorization: token },
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              // console.log(data)
+              setPms(data.users);
+            })
+            .catch((err) => console.log(err));
         })
         .catch((err) => console.log(err));
     } else {

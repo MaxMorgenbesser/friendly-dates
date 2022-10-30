@@ -13,7 +13,6 @@ export default function Matches() {
   
   useEffect(() => {
     fetch(`https://friendlydatesbackend.web.app/connect/matches/${user.uid}`, {
-      method:"PUT",
       headers: { Authorization: token },
     })
       .then((res) => res.json())
