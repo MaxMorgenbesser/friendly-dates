@@ -29,7 +29,6 @@ async function getToken (){
   return (
     <data.Provider value={{setUid,uid,setTempToken,tempToken,pin, setPin, user,setUser, token,SetToken}}>
   <NavigationContainer initialRouteName = "test">
-  {/* {token && console.log(token)} */}
  <LoginNav/>
  
  </NavigationContainer>
