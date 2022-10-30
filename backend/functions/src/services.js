@@ -4,10 +4,42 @@ import {
   secretKey,
   twilionumber,
 } from "../credentials.js";
-import { DbConnect } from "../dbconnect.js";
+import { DbConnect, storageConnect } from "../dbconnect.js";
 import twilio from "twilio";
 import jwt from "jsonwebtoken";
+import { user } from "firebase-functions/v1/auth";
 // import e from "express";
+
+
+export async function connect(req,res) {
+const uid = req.params.uid
+
+if (!uid){
+  res.status(400).send({error:"missing uid"})
+  return
+}
+const collection = DbConnect()
+const allusers = await collection.find().toArray()
+const thisUser = await collection.findOne({uid})
+
+let users = allusers.filter(user => 
+  (user.uid != uid))
+
+if (thisUser.user && thisUser.user.Ilike) {
+users = users.filter(user=>(!thisUser.user.Ilike.includes(user.uid)))
+}
+if (thisUser.user && thisUser.user.Idislike) {
+users = users.filter(user=>(!thisUser.user.Idislike.includes(user.uid)))
+}
+
+users = users.filter(user=>(user.user))
+
+res.status(200).send({"users":users})
+}
+
+
+
+
 
 export async function getmatches(req, res) {
   let matcharr = [];
@@ -69,7 +101,7 @@ export async function likeOrDislike(req, res) {
 
   const collection = DbConnect();
   const sender = await collection.findOne({ uid: uid });
-  console.log(sender);
+  // console.log(sender);
   if (!sender) {
     res.status(400).send({ error: "sender not found" });
     return;
