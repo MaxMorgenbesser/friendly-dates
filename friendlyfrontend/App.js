@@ -20,6 +20,7 @@ useEffect(()=>{
   getToken()
 },[])
 
+
 async function getToken (){
   SetToken( await AsyncStorage.getItem("token"))
   console.log(token)
