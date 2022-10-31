@@ -27,7 +27,7 @@ export default function MyProfile() {
 const takePicture = async () => {
   if (camera) {
     const data = await camera.takePictureAsync();
-    console.log(data.uri);
+    // console.log(data.uri);
     setPhoto(data.uri);
     SetShowCamera(false)
   }
@@ -54,13 +54,39 @@ function toggleCameraType() {
     }
   };
 
+const getBlob = async () =>{
+const resp = await fetch(photo)
+const blob = await resp.blob()
+return blob
+}
 
-
+const submitPhoto = async () => {
+  // const gc = wait storageConnect()
+     const blob = await getBlob()
+        //  console.log(blob)
+        
+  
+      fetch(`https://friendlydatesbackend.web.app/users/updateuser/${user.uid}`, {
+        method: "PUT",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ "photo": blob["_data"]["name"]}), 
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setPhoto(null);
+          // setBlob(null);
+          console.log(data);
+        })
+        .catch((err) => console.log(err));
+    };
 
 
   useEffect(() => {
     if (token) {
-      console.log(token);
+      // console.log(token);
       setUser(jwtDecode(token))
     }
   }, [token]);
@@ -76,9 +102,9 @@ function toggleCameraType() {
         flexDirection: "column",
       }}
     >
-      {photo && console.log(photo)}
-      {user && console.log(user)}
-      {token && console.log(token)}
+      {/* {photo && console.log(photo)} */}
+      {/* {user && console.log(user)} */}
+      {/* {token && console.log(token)} */}
       <View>
         <Text>My profile is going here</Text>
       </View>
@@ -96,7 +122,7 @@ function toggleCameraType() {
      { !photo && !showCamera && <Button title="Choose Photo" onPress={pickImage} />}
       {photo && <><Image source = {{uri:photo}} style={{ height: 200, margin: 10, width: 200}} resizeMode="contain"/>
       <Button title="use a different photo" onPress={()=> setPhoto(null)} ></Button>
-      <Button title="Submit Photo"  ></Button>
+      <Button title="Submit Photo" onPress={submitPhoto} ></Button>
       </>}
 
     
