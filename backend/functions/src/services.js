@@ -292,24 +292,14 @@ export const userProfile = async (req, res) => {
     console.log(photo)
     const gc = await storageConnect();
     const friendlydatesbucket = gc.bucket("friendlydates");
-    const upload = friendlydatesbucket.file(photo);
-    const uploadstream = upload
-    .createWriteStream();
-    uploadstream.on("finish", () => {
-      console.log("file uploaded");
-    });
-    uploadstream
-      .end()
-      // .catch((err) => console.log(err));
-
-    // console.log(uploadedfile);
-    //  (friendlydatesbucket.getFiles(file => console.log(file)))
+    await friendlydatesbucket.upload(photo)
+    .catch(err => console.log(err))
     const [files] = await friendlydatesbucket.getFiles();
     console.log("Files:");
     files.forEach((file) => {
       console.log(file.metadata);
     });
-    // .catch(err => console.log(err))
+    
   }
 
   if (photo && !bio) {
