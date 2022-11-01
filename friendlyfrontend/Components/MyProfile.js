@@ -1,11 +1,11 @@
 import { View, Text, SafeAreaView ,Button,TouchableOpacity, Dimensions, Image } from "react-native";
 import { data } from "../App";
+import * as FileSystem from 'expo-file-system';
 import { useContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import * as ImagePicker from 'expo-image-picker';
 import {Camera, CameraType} from 'expo-camera'
-
-
+// import { Storage } from "@google-cloud/storage";
 export default function MyProfile() {
   const [camera, setCamera] = useState(null);
   const { token } = useContext(data);
@@ -13,7 +13,7 @@ export default function MyProfile() {
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState();
   const [showCamera, SetShowCamera] = useState(false);
-
+  const [base64,setBase64] = useState({})
   const startCamera = async () => {
   const {status} = await Camera.requestCameraPermissionsAsync()
  if(status === 'granted'){
@@ -54,34 +54,56 @@ function toggleCameraType() {
     }
   };
 
-const getBlob = async () =>{
-const resp = await fetch(photo)
-const blob = await resp.blob()
-return blob
+useEffect(()=>{
+  if (photo){
+   console.log(getbase64())
+  }
+},[photo,setPhoto])
+
+
+
+const submitPhoto = async ()=>{
+  const image = {
+    uri: photo,
+    type: 'image/jpeg',
+    name: 'myImage' + '-' + Date.now() + '.jpg'
+  }
+  console.log(image)
+  const base64string = await getbase64()
+  const imgBody = new FormData();
+  imgBody.append('image', image)
+  const url = `https://friendlydatesbackend.web.app/users/updateusers/${user.uid}`
+
+  fetch(url, {
+    method: 'PUT',
+    headers: {
+      // "Authorization":token,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({photo:base64string})
+    }).then(res => res.json()).then(results => {
+      console.log(results)
+      setPhoto(null)
+      // Just me assigning the image url to be seen in the view
+      // const source = { uri: res.imageUrl, isStatic: true };
+      // const images = this.state.images;
+      // images[index] = source;
+      // this.setState({ images });
+  }).catch(error => {
+    console.error(error)
+  })
 }
 
-const submitPhoto = async () => {
-  // const gc = wait storageConnect()
-     const blob = await getBlob()
-        //  console.log(blob)
-        
-  
-      fetch(`https://friendlydatesbackend.web.app/users/updateuser/${user.uid}`, {
-        method: "PUT",
-        headers: {
-          Authorization: token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ "photo": blob["_data"]["name"]}), 
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setPhoto(null);
-          // setBlob(null);
-          console.log(data);
-        })
-        .catch((err) => console.log(err));
-    };
+async function getbase64 () {
+  const base64 = await FileSystem.readAsStringAsync(photo,
+    { encoding: FileSystem.EncodingType.Base64 });
+  return base64
+}
+
+
+
+
+
 
 
   useEffect(() => {
@@ -102,6 +124,7 @@ const submitPhoto = async () => {
         flexDirection: "column",
       }}
     >
+      
       {/* {photo && console.log(photo)} */}
       {/* {user && console.log(user)} */}
       {/* {token && console.log(token)} */}
