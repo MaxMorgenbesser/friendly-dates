@@ -10,6 +10,45 @@ import jwt from "jsonwebtoken";
 import { user } from "firebase-functions/v1/auth";
 // import e from "express";
 
+export const updatepic = async (req,res) =>{
+  const uid = req.params.uid
+  const photo = req.body.photo
+  if (!uid){
+    res.status(400).send({"error":"invalid user"})
+    return
+  }
+  if (!photo){
+    res.status(400).send({"error":"invalid fields"})
+    return
+  }
+
+const collection = DbConnect()
+
+const user = await collection.findOne({uid:uid})
+
+if (!user){
+  res.status(400).send({"error":"invalid user"})
+  return
+}
+
+const updateduser = await collection.findOneAndUpdate({uid:uid}, 
+  {$set:{"user.photo":photo}})
+
+  // console.log(updateduser) 
+  updateduser.value.user.photo = photo
+  const value = updateduser.value
+  // console.log(value)
+  const token = jwt.sign(value,secretKey)
+  res.status(200).send({token:token})
+
+
+
+
+
+}
+
+
+
 
 export async function connect(req,res) {
 const uid = req.params.uid
@@ -36,10 +75,6 @@ users = users.filter(user=>(user.user))
 
 res.status(200).send({"users":users})
 }
-
-
-
-
 
 export async function getmatches(req, res) {
   let matcharr = [];
@@ -264,70 +299,4 @@ export const adduserinfo = async (req, res) => {
   res.status(200).send({ token: token });
 };
 
-export const userProfile = async (req, res) => {
-  const uid = req.params.uid;
-  const photo = req.body.photo;
-  const bio = req.body.bio;
 
-  if (!uid) {
-    res.status(400).send({ error: "invalid user" });
-    return;
-  }
-
-  if (!bio && !photo) {
-    res.status(400).send({ error: "fields are required" });
-    return;
-  }
-  const collection = DbConnect();
-
-  const user = await collection.findOne({ uid: uid });
-
-  if (!user) {
-    res.status(400).send({ error: "invalid user" });
-    return;
-  }
-
-  if (photo) {
-    // console.log("there is a photo");
-    console.log(photo)
-    const gc = await storageConnect();
-    const friendlydatesbucket = gc.bucket("friendlydates");
-    await friendlydatesbucket.upload(photo)
-    .catch(err => console.log(err))
-    const [files] = await friendlydatesbucket.getFiles();
-    console.log("Files:");
-    files.forEach((file) => {
-      console.log(file.metadata);
-    });
-    
-  }
-
-  if (photo && !bio) {
-    await collection.findOneAndUpdate(
-      { uid: uid },
-      { $push: { "user.photos": photo } }
-    );
-    res.status(200).send({ "photo updated": true });
-    return;
-  }
-
-  if (bio && !photo) {
-    await collection.findOneAndUpdate(
-      { uid: uid },
-      { $set: { "user.bio": bio } }
-    );
-    res.status(200).send({ bio: true });
-    return;
-  }
-
-  await collection.findOneAndUpdate(
-    { uid: uid },
-    { $push: { "user.photos": photo } }
-  );
-  await collection.findOneAndUpdate(
-    { uid: uid },
-    { $set: { "user.bio": bio } }
-  );
-  res.send({ "bio and photo updated": true });
-  return;
-};
