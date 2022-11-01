@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { data } from "../App";
 
 export default function Test() {
-  const { user,setUser ,tempToken} = useContext(data);
+  const { user,setUser ,tempToken, SetToken} = useContext(data);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,6 +37,7 @@ export default function Test() {
           return
         }
         else{
+         SetToken(data.token)
          await AsyncStorage.setItem("token", (data.token))
          navigation.navigate("App")
         }

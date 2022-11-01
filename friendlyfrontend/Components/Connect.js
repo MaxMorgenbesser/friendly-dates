@@ -12,16 +12,18 @@ export default function Connect() {
   const [user, setUser] = useState(jwtDecode(token));
 
   useEffect(() => {
-    if (status && uid) {
+    console.log("owdnv")
+    if (status) {
       sendstatus();
       console.log("wodubc");
     }
-  }, [status, setStatus]);
+  }, [uid, setStatus]);
 
   const [status, setStatus] = useState(null);
   const [uid, setUID] = useState(null);
 
   const sendstatus = () => {
+    console.log("function is running")
     if (status && uid) {
       fetch(
         `https://friendlydatesbackend.web.app/connect/likeordislike/${user.uid}`,
