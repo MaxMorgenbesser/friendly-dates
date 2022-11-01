@@ -35,20 +35,13 @@ const updateduser = await collection.findOneAndUpdate({uid:uid},
   {$set:{"user.photo":photo}})
 
   // console.log(updateduser) 
-  updateduser.value.user.photo = photo
-  const value = updateduser.value
+  // updateduser.value.user.photo = photo
+  // const value = updateduser.value
   // console.log(value)
-  const token = jwt.sign(value,secretKey)
-  res.status(200).send({token:token})
-
-
-
-
+  // const token = jwt.sign(value,secretKey)
+  res.status(200).send({"photo updated":true})
 
 }
-
-
-
 
 export async function connect(req,res) {
 const uid = req.params.uid
@@ -203,6 +196,7 @@ export async function verifyPin(req, res) {
     return;
   } else if (pin == user.pin) {
     if (user.user) {
+      user.user.photo = false
       res.status(200).send({ success: true, token: jwt.sign(user, secretKey) });
       return;
     } else {
@@ -210,6 +204,7 @@ export async function verifyPin(req, res) {
     }
   }
 }
+
 
 export async function verifynum(req, res) {
   const number = req.body.number;
@@ -245,6 +240,10 @@ export async function verifynum(req, res) {
     );
     let val = updateduser.value;
     val.pin = pin;
+
+    if (val.user && val.user.photo){
+      val.user.photo = false
+    }
     const token = jwt.sign(val, secretKey);
     res.send({ token: token });
   } else {
@@ -263,6 +262,9 @@ export async function verifynum(req, res) {
     );
     let updatevalue = updateduser.value;
     updatevalue.uid = newuser.insertedId.toString();
+    if (updatevalue.user && updatevalue.user.photo){
+      updatevalue.user.photo = false
+    }
     const token = jwt.sign(updatevalue, secretKey);
     res.send({ token: token });
   }
@@ -295,6 +297,9 @@ export const adduserinfo = async (req, res) => {
   }
   const val = senduser.value;
   val.user = user;
+  if (val.user && val.user.photo){
+    val.user.photo = false
+  }
   const token = jwt.sign(val, secretKey);
   res.status(200).send({ token: token });
 };
