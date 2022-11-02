@@ -17,20 +17,23 @@ export default function Pin() {
      
       AsyncStorage.setItem("token" , (token))
     }
+    
   },[token,SetToken])
   const verifypin = () => {
+    console.log(user.uid)
+    console.log(checkPin)
     // console.log(tempToken,user.uid, checkPin)
     fetch(`https://friendlydatesbackend.web.app/users/verifypin/${user.uid}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: tempToken,
+         Authorization: tempToken,
       },
       body: JSON.stringify({ pin: checkPin }),
     })
       .then((res) => res.json())
       .then(async (thisdata) => {
-          // await AsyncStorage.clear()
+          // console.log(thisdata)
          console.log(thisdata.token);
         if (thisdata.error) {
           setError(thisdata.error);

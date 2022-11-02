@@ -7,6 +7,9 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import { Credentials } from "aws-sdk";
+import * as ImageManipulator from "expo-image-manipulator";
+import S3 from "aws-sdk/clients/s3"
 import { data } from "../App";
 import * as FileSystem from "expo-file-system";
 import { useContext, useEffect, useState } from "react";
@@ -14,6 +17,7 @@ import jwtDecode from "jwt-decode";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, CameraType } from "expo-camera";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { accesskeyid, secretAccessKey } from "./awscreds";
 // import { Storage } from "@google-cloud/storage";
 export default function MyProfile() {
   const [camera, setCamera] = useState(null);
@@ -32,11 +36,62 @@ export default function MyProfile() {
     }
   };
 
-  async function getbase64() {
-    const base64 = await FileSystem.readAsStringAsync(photo, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    return base64;
+  const getBlob = async (fileUri) => {
+    console.log(fileUri);
+
+    const resizedPhoto = await ImageManipulator.manipulateAsync(
+      fileUri,
+      [{ resize: { width: 400 } }], // resize to width of 300 and preserve aspect ratio
+      { compress: 0.6, format: "jpeg" }
+    );
+
+    const resp = await fetch(resizedPhoto.uri);
+    return await resp.blob();
+  };
+
+  const uploadImage = async (uploadUrl, data) => {
+    const imageBody = await getBlob(data);
+
+    console.log(imageBody);
+
+    const limitedEditionHolidayBlend = await fetch(uploadUrl, {
+      method: "PUT",
+      body: imageBody,
+    }).then((res) => res);
+
+    return limitedEditionHolidayBlend;
+  };
+
+  async function uploadToS3() {
+    try {
+      const access = new Credentials({
+        accessKeyId: accesskeyid,
+        secretAccessKey: secretAccessKey,
+      });
+
+      const s3 = new S3({
+        credentials: access,
+        region: "us-east-1", //"us-west-2"
+        signatureVersion: "v4",
+      });
+
+      const fileId = Math.random().toString(36).slice(2);
+      const signedUrlExpireSeconds = 60 * 15;
+
+      const url = await s3.getSignedUrlPromise("putObject", {
+        Bucket: "friendlydatesbucket",
+        Key: `${fileId}.jpg`,
+        ContentType: "image/jpeg",
+        Expires: signedUrlExpireSeconds,
+      });
+
+      const image = await uploadImage(url, photo);
+      console.log(image)
+
+      return image.url.split("?")[0];
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const takePicture = async () => {
@@ -70,33 +125,12 @@ export default function MyProfile() {
     }
   };
 
-  useEffect(() => {
-    if (photo) {
-      console.log(getbase64());
-    }
-  }, [photo, setPhoto]);
+  // useEffect(() => {
+  //   if (photo) {
+  //     // console.log(getbase64());
+  //   }
+  // }, [photo, setPhoto]);
 
-  const submitPhoto = async () => {
-    if (!photo) {
-      console.log("no photo");
-      return;
-    }
-    const base64 = await getbase64();
-
-    fetch(`https://friendlydatesbackend.web.app/users/updatepic/${user.uid}`, {
-      method: "PUT",
-      headers: { Authorization: token, "Content-Type": "application/json" },
-      body: JSON.stringify({ photo: base64 }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        console.log(data);
-        if (!data.error) {
-          setPhoto(null);
-        }
-      })
-      .catch((err) => console.log(err));
-  };
 
   useEffect(() => {
     if (token) {
@@ -144,7 +178,7 @@ export default function MyProfile() {
             title="use a different photo"
             onPress={() => setPhoto(null)}
           ></Button>
-          <Button title="Submit Photo" onPress={submitPhoto}></Button>
+          <Button title="Submit Photo" onPress={uploadToS3}></Button>
         </>
       )}
 

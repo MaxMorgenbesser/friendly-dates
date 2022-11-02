@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, Button } from "react-native";
+import { View, Text, SafeAreaView, Button, Image } from "react-native";
 // import AsyncStorage,{ useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useState, useContext, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -12,7 +12,7 @@ export default function Connect() {
   const [user, setUser] = useState(jwtDecode(token));
 
   useEffect(() => {
-    console.log("owdnv")
+    console.log("owdnv");
     if (status) {
       sendstatus();
       console.log("wodubc");
@@ -23,7 +23,7 @@ export default function Connect() {
   const [uid, setUID] = useState(null);
 
   const sendstatus = () => {
-    console.log("function is running")
+    console.log("function is running");
     if (status && uid) {
       fetch(
         `https://friendlydatesbackend.web.app/connect/likeordislike/${user.uid}`,
@@ -40,7 +40,11 @@ export default function Connect() {
           setUID(null);
 
           fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
-            headers: { Authorization: token },
+            headers: {
+              "Authorization": token,
+              "Content-Type": "application/json",
+            },
+            method: "GET",
           })
             .then((res) => res.json())
             .then((data) => {
@@ -56,8 +60,10 @@ export default function Connect() {
   };
 
   useEffect(() => {
+    console.log(user.uid);
     fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
-      headers: { Authorization: token },
+      headers: { Authorization: token ,
+        "Content-Type": "application/json",},
     })
       .then((res) => res.json())
       .then((data) => {
@@ -97,6 +103,13 @@ export default function Connect() {
                 overflow: "scroll",
               }}
             >
+              {pm.user.photo && (
+                <Image
+                  source={{ uri: pm.user.photo }}
+                  height="30%"
+                  width="30%"
+                ></Image>
+              )}
               <Button
                 title="like"
                 onPress={() => {
