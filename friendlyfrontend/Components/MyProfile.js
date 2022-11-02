@@ -9,16 +9,14 @@ import {
 } from "react-native";
 import { Credentials } from "aws-sdk";
 import * as ImageManipulator from "expo-image-manipulator";
-import S3 from "aws-sdk/clients/s3"
+import S3 from "aws-sdk/clients/s3";
 import { data } from "../App";
-import * as FileSystem from "expo-file-system";
 import { useContext, useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, CameraType } from "expo-camera";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { accesskeyid, secretAccessKey } from "./awscreds";
-// import { Storage } from "@google-cloud/storage";
+
 export default function MyProfile() {
   const [camera, setCamera] = useState(null);
   const { token, SetToken } = useContext(data);
@@ -26,7 +24,8 @@ export default function MyProfile() {
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState();
   const [showCamera, SetShowCamera] = useState(false);
-  const [base64, setBase64] = useState({});
+  const [AwsLink, setAwsLink] = useState(false);
+
   const startCamera = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
     if (status === "granted") {
@@ -37,7 +36,7 @@ export default function MyProfile() {
   };
 
   const getBlob = async (fileUri) => {
-    console.log(fileUri);
+    // console.log(fileUri);
 
     const resizedPhoto = await ImageManipulator.manipulateAsync(
       fileUri,
@@ -52,7 +51,7 @@ export default function MyProfile() {
   const uploadImage = async (uploadUrl, data) => {
     const imageBody = await getBlob(data);
 
-    console.log(imageBody);
+    // console.log(imageBody);
 
     const limitedEditionHolidayBlend = await fetch(uploadUrl, {
       method: "PUT",
@@ -77,7 +76,7 @@ export default function MyProfile() {
 
       const fileId = Math.random().toString(36).slice(2);
       const signedUrlExpireSeconds = 60 * 15;
-
+      setAwsLink(`https://friendlydatesbucket.s3.amazonaws.com/${fileId}.jpg`);
       const url = await s3.getSignedUrlPromise("putObject", {
         Bucket: "friendlydatesbucket",
         Key: `${fileId}.jpg`,
@@ -86,7 +85,7 @@ export default function MyProfile() {
       });
 
       const image = await uploadImage(url, photo);
-      console.log(image)
+      // console.log(image)
 
       return image.url.split("?")[0];
     } catch (error) {
@@ -110,7 +109,6 @@ export default function MyProfile() {
   }
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -125,19 +123,34 @@ export default function MyProfile() {
     }
   };
 
-  // useEffect(() => {
-  //   if (photo) {
-  //     // console.log(getbase64());
-  //   }
-  // }, [photo, setPhoto]);
-
-
   useEffect(() => {
     if (token) {
       console.log("this useeffect is running");
       setUser(jwtDecode(token));
     }
   }, [token, SetToken]);
+
+  const submitLinkToMongo = () => {
+    fetch(`https://friendlydatesbackend.web.app/users/updatepic/${user.uid}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify({ photo: AwsLink }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setPhoto(null)
+        console.log(data)})
+      .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    if (AwsLink && user) {
+      submitLinkToMongo();
+    }
+  }, [AwsLink, setAwsLink]);
 
   return (
     <SafeAreaView
