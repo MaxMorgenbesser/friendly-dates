@@ -4,26 +4,27 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { data } from "../App";
 import jwtDecode from "jwt-decode";
+import TinderCard from "react-tinder-card";
 
 export default function Connect() {
   const navigation = useNavigation();
   const { token } = useContext(data);
   const [pms, setPms] = useState();
   const [user, setUser] = useState(jwtDecode(token));
-
-  useEffect(() => {
-    console.log("owdnv");
-    if (status) {
-      sendstatus();
-      console.log("wodubc");
-    }
-  }, [uid, setStatus]);
-
   const [status, setStatus] = useState(null);
   const [uid, setUID] = useState(null);
 
+  useEffect(() => {
+    if (status) {
+      sendstatus()
+    }
+  }, [status,uid]);
+
+
+
+
   const sendstatus = () => {
-    console.log("function is running");
+   
     if (status && uid) {
       fetch(
         `https://friendlydatesbackend.web.app/connect/likeordislike/${user.uid}`,
@@ -37,11 +38,12 @@ export default function Connect() {
         .then((data) => {
           console.log(data);
           setStatus(null);
+          22;
           setUID(null);
 
           fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
             headers: {
-              "Authorization": token,
+              Authorization: token,
               "Content-Type": "application/json",
             },
             method: "GET",
@@ -62,8 +64,7 @@ export default function Connect() {
   useEffect(() => {
     console.log(user.uid);
     fetch(`https://friendlydatesbackend.web.app/connect/${user.uid}`, {
-      headers: { Authorization: token ,
-        "Content-Type": "application/json",},
+      headers: { Authorization: token, "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -73,6 +74,7 @@ export default function Connect() {
       .catch((err) => console.log(err));
   }, []);
 
+  
   return (
     <SafeAreaView
       style={{
@@ -82,6 +84,7 @@ export default function Connect() {
         justifyContent: "space-around",
       }}
     >
+      {uid && console.log(uid)}
       <Button
         onPress={() => navigation.navigate("home")}
         title="go Home"
@@ -89,42 +92,58 @@ export default function Connect() {
       <Text>Connect page</Text>
       {pms &&
         pms.map((pm) => {
+          const onSwipe = (direction) => {
+            if (direction === "right") {
+              setStatus("like");
+              setUID(pm.uid)
+            } else if (direction == "left") {
+              setStatus("dislike");
+              setUID(pm.uid)
+            }
+            console.log("You swiped: " + direction);
+            
+          };
           return (
             <View
+            key={pm.uid}
               style={{
                 borderColor: "black",
                 borderWidth: "3%",
-                display: "flex",
+        
                 alignItems: "center",
                 justifyContent: "space-around",
                 flexDirection: "row",
-                height: "85%",
-                width: "80%",
-                overflow: "scroll",
+                width:"100%",
+                height:"50%"
+                
               }}
             >
-              {pm.user.photo && (
-                <Image
-                  source={{ uri: pm.user.photo }}
-                  height="30%"
-                  width="30%"
-                ></Image>
-              )}
-              <Button
-                title="like"
-                onPress={() => {
-                  setStatus("like");
-                  setUID(pm.uid);
-                }}
-              ></Button>
-              <Text key={pm.uid}>{pm.user.firstName}</Text>
-              <Button
-                title="dislike"
-                onPress={() => {
-                  setStatus("dislike");
-                  setUID(pm.uid);
-                }}
-              ></Button>
+              <TinderCard onSwipe={onSwipe}  >
+                {pm.user.photo && (
+                  <>
+                  {console.log(pm.user.photo)}
+                  <Image
+                    style={{ height: "40%", width: "40%" }}
+                    source={{ uri: pm.user.photo }}
+                  ></Image>
+                  </>
+                )}
+                <Button
+                  title="like"
+                  onPress={() => {
+                    setStatus("like");
+                    setUID(pm.uid);
+                  }}
+                ></Button>
+                <Text key={pm.uid}>{pm.user.firstName}</Text>
+                <Button
+                  title="dislike"
+                  onPress={() => {
+                    setStatus("dislike");
+                    setUID(pm.uid);
+                  }}
+                ></Button>
+              </TinderCard>
             </View>
           );
         })}
