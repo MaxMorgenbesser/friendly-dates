@@ -1,6 +1,6 @@
 import jwtDecode from "jwt-decode";
 import { useEffect, useContext, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, View, Image} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { data } from "../App";
 
@@ -27,8 +27,12 @@ export default function Matches() {
         matches["matches found"] &&
         matches["matches found"].map((match) => {
           return (
-            <View>
+            <View style ={{height:"100%"}}>
               <Text key={match.uid}>{match.user.firstName}</Text>
+              {match.user && match.user.photo &&
+              <Image source = {{uri:match.user.photo}}
+              style={{height:"40%", width:"40%"}}></Image>
+        }
             </View>
           );
         })}

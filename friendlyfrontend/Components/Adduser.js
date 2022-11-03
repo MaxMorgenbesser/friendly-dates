@@ -48,8 +48,6 @@ export default function Test() {
   return (
     <SafeAreaView style={{display:"flex",
     alignItems:"center", justifyContent:"center"}}>
-        {/* {uid && console.log(uid)} */}
-      {/* {firstName && console.log(firstName)} */}
       <Text>You will add user info here</Text>
       <Button onPress={()=> AsyncStorage.clear()} title = "clear AsyncStorage"></Button>
       <Button
@@ -74,7 +72,7 @@ export default function Test() {
       />
       {/* {tempToken && console.log(tempToken)} */}
       <TextInput
-        placeholder="first name"
+        placeholder="Last Name"
         keyboardType="default"
         value={lastName}
         onChangeText={setLastName}
