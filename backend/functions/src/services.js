@@ -10,63 +10,101 @@ import jwt from "jsonwebtoken";
 import { user } from "firebase-functions/v1/auth";
 // import e from "express";
 
-export const updatepic = async (req,res) =>{
-  const uid = req.params.uid
-  const photo = req.body.photo
-  if (!uid){
-    res.status(400).send({"error":"invalid user"})
-    return
+export const updatepic = async (req, res) => {
+  const uid = req.params.uid;
+  const photo = req.body.photo;
+  const index = req.body.index;
+  console.log(index);
+  if (!uid) {
+    res.status(400).send({ error: "invalid user" });
+    return;
   }
-  if (!photo){
-    res.status(400).send({"error":"invalid fields"})
-    return
+  if (!photo) {
+    res.status(400).send({ error: "invalid fields" });
+    return;
   }
 
-const collection = DbConnect()
+  const collection = DbConnect();
 
-const user = await collection.findOne({uid:uid})
+  const user = await collection.findOne({ uid: uid });
 
-if (!user){
-  res.status(400).send({"error":"invalid user"})
-  return
-}
+  if (!user) {
+    res.status(400).send({ error: "invalid user" });
+    return;
+  }
 
-const updateduser = await collection.findOneAndUpdate({uid:uid}, 
-  {$set:{"user.photo":photo}})
+  if (!user.user.pics || user.user.pics.length < 5) {
+    const updateduser = await collection.findOneAndUpdate(
+      { uid: uid },
+      { $push: { "user.pics": photo } }
+    );
+    res.status(200).send({ "photo updated": true });
+    return;
+  } else {
+    if ( typeof index != "number" || index > 5 || index < 0) {
+      res.status(400).send({ error: "invalid index" });
+      return;
+    }
+    user.user.pics[index] = photo;
+    console.log(user.user.pics);
+    await collection.findOneAndUpdate(
+      ({ uid: uid }, { $set: { "user.pics": user.user.pics } })
+    );
+    res.status(200).send({ "photo updated": true });
+  }
+};
 
-  // console.log(updateduser) 
-  // updateduser.value.user.photo = photo
-  // const value = updateduser.value
-  // console.log(value)
-  // const token = jwt.sign(value,secretKey)
-  res.status(200).send({"photo updated":true})
 
-}
 
-export async function connect(req,res) {
-const uid = req.params.uid
 
-if (!uid){
-  res.status(400).send({error:"missing uid"})
-  return
-}
-const collection = DbConnect()
-const allusers = await collection.find().toArray()
-const thisUser = await collection.findOne({uid})
 
-let users = allusers.filter(user => 
-  (user.uid != uid))
 
-if (thisUser.user && thisUser.user.Ilike) {
-users = users.filter(user=>(!thisUser.user.Ilike.includes(user.uid)))
-}
-if (thisUser.user && thisUser.user.Idislike) {
-users = users.filter(user=>(!thisUser.user.Idislike.includes(user.uid)))
-}
 
-users = users.filter(user=>(user.user))
 
-res.status(200).send({"users":users})
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function connect(req, res) {
+  // console.log("padoknvwondv --- sokdn test")
+  const uid = req.params.uid;
+  console.log(uid);
+
+  if (!uid) {
+    res.status(400).send({ error: "missing uid" });
+    return;
+  }
+  const collection = DbConnect();
+  const allusers = await collection.find().toArray();
+  const thisUser = await collection.findOne({ uid: uid });
+  console.log(thisUser);
+
+  if (!thisUser) {
+    res.status(400).send({ error: "user not found" });
+  }
+
+  let users = allusers.filter((user) => user.uid != uid);
+
+  if (thisUser.user && thisUser.user.Ilike) {
+    users = users.filter((user) => !thisUser.user.Ilike.includes(user.uid));
+  }
+
+  if (thisUser.user && thisUser.user.Idislike) {
+    users = users.filter((user) => !thisUser.user.Idislike.includes(user.uid));
+  }
+
+  users = users.filter((user) => user.user);
+
+  res.status(200).send({ users: users });
 }
 
 export async function getmatches(req, res) {
@@ -89,8 +127,8 @@ export async function getmatches(req, res) {
   // console.log(allusers)
   // console.log(user);
   if (user.user && user.user.likesme && user.user.Ilike) {
-    console.log(user.user.likesme)
-    console.log(user.user.Ilike)
+    console.log(user.user.likesme);
+    console.log(user.user.Ilike);
     allusers.map((oneuser) => {
       if (oneuser.user && oneuser.user.Ilike) {
         console.log(oneuser.user.Ilike);
@@ -122,7 +160,7 @@ export async function likeOrDislike(req, res) {
     return;
   }
 
-  if (!status || status != "like" && status !="dislike" ) {
+  if (!status || (status != "like" && status != "dislike")) {
     res.status(400).send({ error: "status is incorrect" });
     return;
   }
@@ -158,7 +196,7 @@ export async function likeOrDislike(req, res) {
     return;
   }
 
- if (status == "dislike") {
+  if (status == "dislike") {
     await collection.findOneAndUpdate(
       { uid: uid },
       {
@@ -196,7 +234,7 @@ export async function verifyPin(req, res) {
     return;
   } else if (pin == user.pin) {
     if (user.user) {
-      user.user.photo = false
+      user.user.photo = false;
       res.status(200).send({ success: true, token: jwt.sign(user, secretKey) });
       return;
     } else {
@@ -204,7 +242,6 @@ export async function verifyPin(req, res) {
     }
   }
 }
-
 
 export async function verifynum(req, res) {
   const number = req.body.number;
@@ -241,8 +278,8 @@ export async function verifynum(req, res) {
     let val = updateduser.value;
     val.pin = pin;
 
-    if (val.user && val.user.photo){
-      val.user.photo = false
+    if (val.user && val.user.photo) {
+      val.user.photo = false;
     }
     const token = jwt.sign(val, secretKey);
     res.send({ token: token });
@@ -262,8 +299,8 @@ export async function verifynum(req, res) {
     );
     let updatevalue = updateduser.value;
     updatevalue.uid = newuser.insertedId.toString();
-    if (updatevalue.user && updatevalue.user.photo){
-      updatevalue.user.photo = false
+    if (updatevalue.user && updatevalue.user.photo) {
+      updatevalue.user.photo = false;
     }
     const token = jwt.sign(updatevalue, secretKey);
     res.send({ token: token });
@@ -297,11 +334,9 @@ export const adduserinfo = async (req, res) => {
   }
   const val = senduser.value;
   val.user = user;
-  if (val.user && val.user.photo){
-    val.user.photo = false
+  if (val.user && val.user.photo) {
+    val.user.photo = false;
   }
   const token = jwt.sign(val, secretKey);
   res.status(200).send({ token: token });
 };
-
-
