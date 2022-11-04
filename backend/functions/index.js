@@ -23,7 +23,7 @@ app.use(express.json());
 // login and add user info if user info is not available
 app.post("/users/verifynum", verifynum);
 app.put("/users/adduserinfo/:uid", middleware, adduserinfo);
-app.put('/users/updatepic/:uid' , updatepic)
+app.put('/users/updatepic/:uid' , middleware,updatepic)
 app.post("/users/verifypin/:uid", middleware, verifyPin);
 app.post("/messages/add", middleware, addMessage);
 app.put("/connect/likeordislike/:uid", middleware, likeOrDislike);

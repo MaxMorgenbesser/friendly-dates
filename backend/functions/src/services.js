@@ -41,38 +41,19 @@ export const updatepic = async (req, res) => {
     res.status(200).send({ "photo updated": true });
     return;
   } else {
-    if ( typeof index != "number" || index > 5 || index < 0) {
+    if (typeof index != "number" || index > 5 || index < 0) {
       res.status(400).send({ error: "invalid index" });
       return;
     }
     user.user.pics[index] = photo;
     console.log(user.user.pics);
     await collection.findOneAndUpdate(
-      ({ uid: uid }, { $set: { "user.pics": user.user.pics } })
+      { uid: uid },
+      { $set: { "user.pics": user.user.pics } }
     );
     res.status(200).send({ "photo updated": true });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export async function connect(req, res) {
   // console.log("padoknvwondv --- sokdn test")
