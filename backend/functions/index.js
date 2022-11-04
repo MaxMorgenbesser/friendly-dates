@@ -1,6 +1,6 @@
 // const functions = require("firebase-functions");
 import functions from "firebase-functions";
-import express, { json } from "express";
+import express from "express";
 import cors from "cors";
 import {
   adduserinfo,
@@ -18,17 +18,17 @@ import { addMessage } from "./src/messages.js";
 
 const app = express();
 app.use(cors());
-app.use(json());
+app.use(express.json());
 
 // login and add user info if user info is not available
 app.post("/users/verifynum", verifynum);
 app.put("/users/adduserinfo/:uid", middleware, adduserinfo);
-app.put('/users/updatepic/:uid' , middleware, updatepic)
+app.put('/users/updatepic/:uid' , middleware,updatepic)
 app.post("/users/verifypin/:uid", middleware, verifyPin);
 app.post("/messages/add", middleware, addMessage);
 app.put("/connect/likeordislike/:uid", middleware, likeOrDislike);
 app.get("/connect/matches/:uid", middleware, getmatches);
-app.get("/connect/:uid", middleware, connect);
+app.get("/connect/:uid",  middleware, connect);
 
 export const api = functions.https.onRequest(app);
 // // Create and Deploy Your First Cloud Functions
