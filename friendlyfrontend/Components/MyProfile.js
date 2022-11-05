@@ -23,6 +23,7 @@ export default function MyProfile() {
   const [user, setUser] = useState();
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState();
+ 
   const [showCamera, SetShowCamera] = useState(false);
   const [AwsLink, setAwsLink] = useState(false);
 
